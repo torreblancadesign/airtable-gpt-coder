@@ -39,6 +39,7 @@ async function get_code_from_chatgpt(prompt) {
 async function upload_to_fileio(fileContent, fileName) {
   const formData = new FormData();
   formData.append('file', fileContent, fileName);
+  formData.append('expires', '14d'); // Set the expiration time to 14 days
 
   const response = await axios.post('https://file.io/', formData, {
     headers: {
@@ -52,6 +53,7 @@ async function upload_to_fileio(fileContent, fileName) {
 
   return response.data.link;
 }
+
 
 
 export default async function handler(req, res) {
