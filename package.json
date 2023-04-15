@@ -1,0 +1,25 @@
+{
+  "name": "airtable-gpt-coder",
+  "version": "1.0.0",
+  "description": "Creates code files from a prompt in Airtable and saves the file back in Airtable",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "torreblancadesign/airtable-gpt-coder.git"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "airtable": "^0.11.1",
+    "axios": "^0.26.1",
+    "form-data": "^4.0.0"
+  }
+}
