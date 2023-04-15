@@ -12,13 +12,13 @@ const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_I
 
 async function get_code_from_chatgpt(prompt) {
   const response = await axios.post(
-    "https://api.openai.com/v1/engines/davinci-codex/completions",
+    "https://api.openai.com/v1/engines/text-davinci-003/completions",
     {
       prompt: prompt,
       max_tokens: 100,
       n: 1,
       stop: null,
-      temperature: 0.5,
+      temperature: 0.7,
     },
     {
       headers: {
@@ -28,9 +28,13 @@ async function get_code_from_chatgpt(prompt) {
     }
   );
 
-  const generated_code = response.data.choices[0].text.trim();
-  return generated_code;
+  if (response.status !== 200) {
+    throw new Error(`Failed to generate code from ChatGPT: ${response.statusText}`);
+  }
+
+  return response.data.choices[0].text.trim();
 }
+
 
 async function upload_to_fileio(fileContent, fileName) {
   const formData = new FormData();
