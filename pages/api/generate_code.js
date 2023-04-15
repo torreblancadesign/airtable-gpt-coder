@@ -70,7 +70,8 @@ export default async function handler(req, res) {
         // Save code as attachment
         const file_name = `${record.id}_generated_code.txt`;
         const file_url = await upload_to_fileio(generated_code, file_name);
-        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Attachment: [{ url: file_url }] });
+        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Attachment: [{ url: file_url }], Url: file_url });
+
 
         // Update status
         await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Completed" });
