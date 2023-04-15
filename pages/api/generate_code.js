@@ -2,6 +2,8 @@ import Airtable from "airtable";
 import axios from "axios";
 import FormData from "form-data";
 import { Readable } from "stream";
+import cloudinary from 'cloudinary';
+
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
@@ -36,23 +38,22 @@ async function get_code_from_chatgpt(prompt) {
 }
 
 
-async function upload_to_fileio(fileContent, fileName) {
-  const formData = new FormData();
-  formData.append('file', fileContent, fileName);
-  formData.append('expires', '14d'); // Set the expiration time to 14 days
-
-  const response = await axios.post('https://file.io/', formData, {
-    headers: {
-      ...formData.getHeaders(),
-    },
+async function uploadToCloudinary(fileContent, fileName) {
+  cloudinary.v2.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
   });
 
-  if (response.status !== 200) {
-    throw new Error(`Failed to upload file to File.io: ${response.statusText}`);
-  }
+  const base64EncodedContent = Buffer.from(fileContent).toString('base64');
+  const response = await cloudinary.v2.uploader.upload(`data:text/plain;base64,${base64EncodedContent}`, {
+    resource_type: 'raw',
+    public_id: fileName,
+  });
 
-  return response.data.link;
+  return response.secure_url;
 }
+
 
 
 
@@ -71,7 +72,7 @@ export default async function handler(req, res) {
 
         // Save code as attachment
         const file_name = `${record.id}_generated_code.txt`;
-        const file_url = await upload_to_fileio(generated_code, file_name);
+        const file_url = await uploadToCloudinary(generated_code, file_name);
         await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Attachment: [{ url: file_url }], Url: file_url });
 
 
