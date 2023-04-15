@@ -16,25 +16,25 @@ async function get_code_from_chatgpt(prompt) {
   const response = await axios.post(
     "https://api.openai.com/v1/engines/text-davinci-003/completions",
     {
-      prompt: prompt,
-      max_tokens: 100,
+      prompt: `Please provide the file name and the code for the following requirement:\n\n${prompt}\n\nFile name: `,
+      max_tokens: 200,
       n: 1,
       stop: null,
       temperature: 0.7,
     },
     {
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
       },
     }
   );
 
-  if (response.status !== 200) {
-    throw new Error(`Failed to generate code from ChatGPT: ${response.statusText}`);
-  }
+  const output = response.data.choices[0].text.trim();
+  const [fileName, ...codeLines] = output.split('\n');
+  const code = codeLines.join('\n');
 
-  return response.data.choices[0].text.trim();
+  return { fileName, code };
 }
 
 
@@ -61,18 +61,17 @@ export default async function handler(req, res) {
   try {
     const records = await airtable(AIRTABLE_TABLE_NAME).select({ view: "Pending" }).all();
 
-    for (const record of records) {
+   for (const record of records) {
   const prompt = record.get("Prompt");
 
   try {
-    const generated_code = await get_code_from_chatgpt(prompt);
+    const { fileName, code } = await get_code_from_chatgpt(prompt);
 
     // Save code as plain text
-    await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Code: generated_code });
+    await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Code: code });
 
     // Save code as attachment
-    const file_name = `${record.id}_generated_code.txt`;
-    const file_url = await uploadToCloudinary(generated_code, file_name);
+    const file_url = await uploadToCloudinary(code, fileName);
     await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Attachment: [{ url: file_url }], Url: file_url });
 
     // Update status
@@ -82,6 +81,7 @@ export default async function handler(req, res) {
     await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Error" });
   }
 }
+
 
 
     res.status(200).json({ message: "Function executed successfully" });
