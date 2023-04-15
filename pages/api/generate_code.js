@@ -32,19 +32,23 @@ async function get_code_from_chatgpt(prompt) {
   return generated_code;
 }
 
-async function upload_to_fileio(file_content, file_name) {
-  const stream = Readable.from(file_content);
+async function upload_to_fileio(fileContent, fileName) {
   const formData = new FormData();
-  formData.append("file", stream, { filename: file_name });
+  formData.append('file', fileContent, fileName);
 
-  const response = await axios.post("https://file.io/", formData, {
+  const response = await axios.post('https://file.io/', formData, {
     headers: {
       ...formData.getHeaders(),
     },
   });
 
+  if (response.status !== 200) {
+    throw new Error(`Failed to upload file to File.io: ${response.statusText}`);
+  }
+
   return response.data.link;
 }
+
 
 export default async function handler(req, res) {
   try {
