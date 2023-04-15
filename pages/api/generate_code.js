@@ -62,29 +62,27 @@ export default async function handler(req, res) {
     const records = await airtable(AIRTABLE_TABLE_NAME).select({ view: "Pending" }).all();
 
     for (const record of records) {
-      const prompt = record.get("Prompt");
+  const prompt = record.get("Prompt");
 
-      try {
-        const generated_code = await get_code_from_chatgpt(prompt);
+  try {
+    const generated_code = await get_code_from_chatgpt(prompt);
 
-        // Save code as plain text
-        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Code: generated_code });
+    // Save code as plain text
+    await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Code: generated_code });
 
-        // Save code as attachment
-        const file_name = `${record.id}_generated_code.txt`;
-        const file_url = await uploadToCloudinary(generated_code, file_name);
-        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Attachment: [{ url: file_url }], Url: file_url });
+    // Save code as attachment
+    const file_name = `${record.id}_generated_code.txt`;
+    const file_url = await uploadToCloudinary(generated_code, file_name);
+    await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Attachment: [{ url: file_url }], Url: file_url });
 
+    // Update status
+    await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Completed" });
+  } catch (error) {
+    console.error(`Error processing record ${record.id}:`, error);
+    await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Error" });
+  }
+}
 
-        // Update status
-        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Completed" });
-      } catch (error) {
-         console.error(`Error processing record ${record.id}: ${error.message}`);
-         console.error(`Error details: ${JSON.stringify(error.response.data, null, 2)}`);
-         await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Error" });
-
-      }
-    }
 
     res.status(200).json({ message: "Function executed successfully" });
   } catch (error) {
