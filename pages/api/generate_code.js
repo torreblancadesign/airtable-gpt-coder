@@ -71,8 +71,10 @@ export default async function handler(req, res) {
         // Update status
         await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Completed" });
       } catch (error) {
-        console.error(`Error processing record ${record.id}: ${error.message}`);
-        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Error" });
+         console.error(`Error processing record ${record.id}: ${error.message}`);
+         console.error(`Error details: ${JSON.stringify(error.response.data, null, 2)}`);
+         await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Error" });
+
       }
     }
 
