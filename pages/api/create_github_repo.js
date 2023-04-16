@@ -24,27 +24,34 @@ async function createRepoAndUploadFiles(repoName, files, githubToken) {
   console.log(`Repository created: ${repoUrl}`);
 
   // Upload files to the repository
-  for (const file of files) {
-    const { fileName, fileContent } = file;
+  let fileName = "";
+  try {
+    for (const file of files) {
+      fileName = file.fileName;
+      const fileContent = file.fileContent;
 
-    const requestBody = {
-      message: `Add ${fileName}`,
-      content: Buffer.from(fileContent).toString('base64'),
-    };
+      const requestBody = {
+        message: `Add ${fileName}`,
+        content: Buffer.from(fileContent).toString('base64'),
+      };
 
-    console.log('Request data:', { fileName, requestBody });
+      console.log('Request data:', { fileName, requestBody });
 
-    await axios.put(
-      `https://api.github.com/repos/${response.data.full_name}/contents/${fileName}`,
-      requestBody,
-      {
-        headers: {
-          'Authorization': `token ${githubToken}`,
-        },
-      }
-    );
+      await axios.put(
+        `https://api.github.com/repos/${response.data.full_name}/contents/${fileName}`,
+        requestBody,
+        {
+          headers: {
+            'Authorization': `token ${githubToken}`,
+          },
+        }
+      );
+    }
+  } catch (error) {
+    console.error("Error uploading file:", fileName);
+    console.error("Error details:", error.response.data);
+    throw error;
   }
-
 
   console.log('Files uploaded to the repository');
 }
