@@ -70,10 +70,11 @@ async function uploadToCloudinary(fileContent, fileName) {
 
 */
 
-
-
 export default async function handler(req, res) {
-     // Process records one by one
+  try {
+    const records = await airtable(AIRTABLE_TABLE_NAME).select({ view: "Pending" }).all();
+
+    // Process records one by one
     const processRecord = async (index) => {
       if (index >= records.length) {
         res.status(200).json({ message: "Function executed successfully" });
@@ -108,4 +109,7 @@ export default async function handler(req, res) {
     // Start processing records
     processRecord(0);
 
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
