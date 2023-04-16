@@ -32,10 +32,12 @@ async function get_code_from_chatgpt(prompt) {
 
   const output = response.data.choices[0].text.trim();
   const [fileName, ...codeLines] = output.split('\n');
-  const code = codeLines.join('\n');
+  const codeWithoutPrefix = codeLines.map(line => line.startsWith("Code:") ? line.slice(5).trim() : line);
+  const code = codeWithoutPrefix.join('\n');
 
   return { fileName, code };
 }
+
 
 /*
 async function uploadToCloudinary(fileContent, fileName) {
