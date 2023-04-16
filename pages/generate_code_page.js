@@ -2,9 +2,10 @@ import { useEffect } from 'react';
 
 const GenerateCodePage = () => {
   useEffect(() => {
-    async function fetchData() {
+   async function fetchData() {
       try {
-        const response = await fetch('/api/generate_code');
+        const recordId = 'your_record_id_here';
+        const response = await fetch(`/api/generate_code?recordId=${recordId}`);
         const data = await response.json();
         console.log(data);
       } catch (error) {
