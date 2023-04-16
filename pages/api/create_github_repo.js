@@ -83,12 +83,10 @@ async function handler(req, res) {
     await createRepoAndUploadFiles(repoName, files, githubToken);
     res.status(200).json({ message: 'Repository created successfully' });
   } catch (error) {
-    
-    
-    console.error("Error uploading file:", fileName);
-    console.error("Error details:", error.response.data);
-    throw error;
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
 }
+
 
 export default handler;
