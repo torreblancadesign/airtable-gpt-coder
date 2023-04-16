@@ -75,7 +75,11 @@ async function getFilesFromAirtable() {
 }
 
 async function handler(req, res) {
-  const repoName = 'my-nextjs-app';
+  const { repoName } = req.query; // Extract the repo name from the query parameter
+
+  if (!repoName) {
+     return res.status(400).json({ error: "Repo name is required" });
+  }
   const githubToken = process.env.GITHUB_TOKEN; // Store your GitHub PAT in an environment variable
   const files = await getFilesFromAirtable();
 
