@@ -1,6 +1,12 @@
-import axios from 'axios';
-import { airtable } from '../../utils/airtable';
+import Airtable from "airtable";
+import axios from "axios";
+
+const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+const AIRTABLE_TABLE_NAME = process.env.AIRTABLE_TABLE_NAME;
 // Import any other helper functions you need
+
+const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 
 async function createRepoAndUploadFiles(repoName, files, githubToken) {
   // Create the GitHub repository
