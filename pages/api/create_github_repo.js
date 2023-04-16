@@ -58,7 +58,7 @@ async function createRepoAndUploadFiles(repoName, files, githubToken) {
 
 async function getFilesFromAirtable() {
   // Fetch files from Airtable
-  const airtableRecords = await airtable('Code Files').select().all();
+  const airtableRecords = await airtable('Code Files').select({ view: 'In_Github' }).all();
 
   // Extract file names and content from Airtable records
   const files = airtableRecords.map(record => {
