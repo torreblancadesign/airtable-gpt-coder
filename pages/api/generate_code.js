@@ -36,9 +36,13 @@ async function get_code_from_chatgpt(prompt) {
     );
 
     if (response.data && response.data.choices && response.data.choices[0]) {
-      const output = response.data.choices[0].text.trim();
-      const [fileName, ...codeLines] = output.split('\n');
-      const code = codeLines.join('\n');
+       const output = response.data.choices[0].text.trim();
+  const [fileNameWithPath, ...codeLines] = output.split('\n');
+  const fileName = getFileNameFromPath(fileNameWithPath);
+  const codeWithoutPrefix = codeLines.map(line => line.startsWith("Code:") ? line.slice(5).trim() : line);
+  const code = codeWithoutPrefix.join('\n');
+
+  return { fileName, code };
 
       return { fileName, code };
     } else {
