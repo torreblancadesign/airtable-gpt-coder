@@ -76,34 +76,32 @@ async function uploadToCloudinary(fileContent, fileName) {
 
 export default async function handler(req, res) {
   try {
-    console.log('Fetching records from Airtable...');
-    const records = await airtable(AIRTABLE_TABLE_NAME).select({ view: "Pending" }).all();
-    console.log('Records fetched:', records.length);
+    const recordId = req.query.recordId;
+    if (!recordId) {
+      res.status(400).json({ message: "Please provide a valid record ID." });
+      return;
+    }
 
-    for (const record of records) {
-      const prompt = record.get("Prompt");
-      console.log('Processing record:', record.id);
+    const record = await airtable(AIRTABLE_TABLE_NAME).find(recordId);
+    const prompt = record.get("Prompt");
 
-      try {
-        const { fileName, code } = await get_code_from_chatgpt(prompt);
-        console.log('Code and file name generated:', code, fileName);
+    try {
+      const { fileName, code } = await get_code_from_chatgpt(prompt);
 
-        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Code: code });
-        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { File_Name: fileName });
+      // Save code as plain text
+      await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Code: code });
+      await airtable(AIRTABLE_TABLE_NAME).update(record.id, { File_Name: fileName });
 
-        console.log('Updated record with code and file name:', record.id);
-
-        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Completed" });
-        console.log('Record status set to "Completed":', record.id);
-      } catch (error) {
-        console.error(`Error processing record ${record.id}:`, error);
-        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Error" });
-      }
+      // Update status
+      await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Completed" });
+    } catch (error) {
+      console.error(`Error processing record ${record.id}:`, error);
+      await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Error" });
     }
 
     res.status(200).json({ message: "Function executed successfully" });
   } catch (error) {
-    console.error('Error in handler:', error);
     res.status(500).json({ error: error.message });
   }
 }
+
