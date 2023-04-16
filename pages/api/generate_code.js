@@ -72,44 +72,34 @@ async function uploadToCloudinary(fileContent, fileName) {
 
 export default async function handler(req, res) {
   try {
+    console.log('Fetching records from Airtable...');
     const records = await airtable(AIRTABLE_TABLE_NAME).select({ view: "Pending" }).all();
+    console.log('Records fetched:', records.length);
 
-    // Process records one by one
-    const processRecord = async (index) => {
-      if (index >= records.length) {
-        res.status(200).json({ message: "Function executed successfully" });
-        return;
-      }
-
-      const record = records[index];
+    for (const record of records) {
       const prompt = record.get("Prompt");
+      console.log('Processing record:', record.id);
 
       try {
         const { fileName, code } = await get_code_from_chatgpt(prompt);
+        console.log('Code and file name generated:', code, fileName);
 
-        if (fileName && code) {
-          // Save code as plain text
-          await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Code: code });
-          await airtable(AIRTABLE_TABLE_NAME).update(record.id, { File_Name: fileName });
+        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Code: code });
+        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { File_Name: fileName });
 
-          // Update status
-          await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Completed" });
-        } else {
-          throw new Error('Empty file name or code');
-        }
+        console.log('Updated record with code and file name:', record.id);
+
+        await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Completed" });
+        console.log('Record status set to "Completed":', record.id);
       } catch (error) {
         console.error(`Error processing record ${record.id}:`, error);
         await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Error" });
       }
+    }
 
-      // Process the next record
-      processRecord(index + 1);
-    };
-
-    // Start processing records
-    processRecord(0);
-
+    res.status(200).json({ message: "Function executed successfully" });
   } catch (error) {
+    console.error('Error in handler:', error);
     res.status(500).json({ error: error.message });
   }
 }
