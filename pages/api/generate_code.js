@@ -17,30 +17,37 @@ function getFileNameFromPath(path) {
 }
 
 async function get_code_from_chatgpt(prompt) {
-  const response = await axios.post(
-    "https://api.openai.com/v1/engines/text-davinci-003/completions",
-    {
-      prompt: `Please provide the file name and the code for the following requirement:\n\n${prompt}\n\nFile name: `,
-      max_tokens: 200,
-      n: 1,
-      stop: null,
-      temperature: 0.7,
-    },
-    {
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/engines/text-davinci-003/completions",
+      {
+        prompt: `Please provide the file name and the code for the following requirement:\n\n${prompt}\n\nFile name: `,
+        max_tokens: 200,
+        n: 1,
+        stop: null,
+        temperature: 0.7,
       },
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (response.data && response.data.choices && response.data.choices[0]) {
+      const output = response.data.choices[0].text.trim();
+      const [fileName, ...codeLines] = output.split('\n');
+      const code = codeLines.join('\n');
+
+      return { fileName, code };
+    } else {
+      throw new Error('Invalid API response format');
     }
-  );
-
-  const output = response.data.choices[0].text.trim();
-  const [fileNameWithPath, ...codeLines] = output.split('\n');
-  const fileName = getFileNameFromPath(fileNameWithPath);
-  const codeWithoutPrefix = codeLines.map(line => line.startsWith("Code:") ? line.slice(5).trim() : line);
-  const code = codeWithoutPrefix.join('\n');
-
-  return { fileName, code };
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return { fileName: '', code: '' };
+  }
 }
 
 
