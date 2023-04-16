@@ -62,7 +62,7 @@ async function getFilesFromAirtable() {
 
   // Extract file names and content from Airtable records
   const files = airtableRecords.map(record => {
-    const fileName = record.get('File Name');
+    const fileName = record.get('File_Name');
     const fileSubfolder = record.get('Subfolder');
 
     return {
