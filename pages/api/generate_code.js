@@ -70,7 +70,7 @@ export default async function handler(req, res) {
 
     // Save code as plain text
     await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Code: code });
-    await airtable(AIRTABLE_TABLE_NAME).update(record.id, { File Name: fileName });
+    await airtable(AIRTABLE_TABLE_NAME).update(record.id, { File_Name: fileName });
 
     // Save code as attachment
   //  const file_url = await uploadToCloudinary(code, fileName);
