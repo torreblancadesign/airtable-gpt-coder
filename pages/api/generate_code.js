@@ -16,7 +16,7 @@ async function get_code_from_chatgpt(prompt) {
   const response = await axios.post(
     "https://api.openai.com/v1/engines/text-davinci-003/completions",
     {
-      prompt: `Please provide the file name and the code for the following requirement:\n\n${prompt}\n\nFile name: `,
+      prompt: `Please provide the file name and the code for the following requirement(make sure to return the code only, no Code: ...):\n\n${prompt}\n\nFile name: `,
       max_tokens: 200,
       n: 1,
       stop: null,
@@ -37,7 +37,7 @@ async function get_code_from_chatgpt(prompt) {
   return { fileName, code };
 }
 
-
+/*
 async function uploadToCloudinary(fileContent, fileName) {
   cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -54,6 +54,7 @@ async function uploadToCloudinary(fileContent, fileName) {
   return response.secure_url;
 }
 
+*/
 
 
 
@@ -69,10 +70,11 @@ export default async function handler(req, res) {
 
     // Save code as plain text
     await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Code: code });
+    await airtable(AIRTABLE_TABLE_NAME).update(record.id, { File Name: fileName });
 
     // Save code as attachment
-    const file_url = await uploadToCloudinary(code, fileName);
-    await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Attachment: [{ url: file_url }], Url: file_url });
+  //  const file_url = await uploadToCloudinary(code, fileName);
+  // await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Attachment: [{ url: file_url }], Url: file_url });
 
     // Update status
     await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Completed" });
