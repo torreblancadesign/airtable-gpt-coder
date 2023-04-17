@@ -90,7 +90,7 @@ export default async function handler(req, res) {
 
       // Save code as plain text
       await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Code: code });
-      await airtable(AIRTABLE_TABLE_NAME).update(record.id, { File_Name: fileName });
+     // await airtable(AIRTABLE_TABLE_NAME).update(record.id, { File_Name: fileName }); removed this line as it will be handled in Airtable
 
       // Update status
       await airtable(AIRTABLE_TABLE_NAME).update(record.id, { Status: "Completed" });
