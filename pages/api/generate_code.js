@@ -19,7 +19,7 @@ function getFileNameFromPath(path) {
 async function get_code_from_chatgpt(prompt) {
   try {
     const response = await axios.post(
-      "https://api.openai.com/v1/engines/text-davinci-003/completions",
+      "https://api.openai.com/v1/chat/completions",
       {
         prompt: `Please provide the file name and the code for the following requirement:\n\n${prompt}\n\nFile name: `,
         max_tokens: 200,
