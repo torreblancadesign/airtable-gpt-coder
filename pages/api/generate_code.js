@@ -22,7 +22,7 @@ async function get_code_from_chatgpt(prompt) {
       "https://api.openai.com/v1/engines/text-davinci-003/completions",
       {
         prompt: `Please provide the file name and the code for the following requirement:\n\n${prompt}\n\nFile name: `,
-        max_tokens: 1000,
+        max_tokens: 400,
         n: 1,
         stop: null,
         temperature: 0.7,
