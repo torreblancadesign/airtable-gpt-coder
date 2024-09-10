@@ -19,7 +19,7 @@ async function createRepoAndUploadFiles(repoName, files, githubToken) {
       },
     }
   );
-//this is just to run a committ.
+//this is just to run a commit a second time lol for vercel.
   const repoUrl = response.data.html_url;
   console.log(`Repository created: ${repoUrl}`);
 
